@@ -78,7 +78,7 @@ def _crop_random(image, mask):
 
     return image, mask
 
-def input_data(TFRecordfile = '/home/saivinay/Documents/crowd/train.tfrecords',batch_size = 8, augment = True, num_threads=2, prefetch =30):
+def input_data(TFRecordfile = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/train.tfrecords',batch_size = 8, augment = True, num_threads=2, prefetch =30):
     train_dataset = tf.data.TFRecordDataset(TFRecordfile)
     train_dataset = train_dataset.map(parse_records,num_parallel_calls=num_threads)
     if augment:

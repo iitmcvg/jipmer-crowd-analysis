@@ -6,7 +6,7 @@ import glob
 import sys
 import os
 
-root = '/home/saivinay/Documents/crowd/shanghai_dataset/part_A/train_data/images/'
+root = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/train_data/images/'
 
 def get_filenames():
     filenames = os.listdir(root)
@@ -57,7 +57,7 @@ def load_count(addr):
 def _bytes_feature(value):
   return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
-train_filename = '/home/saivinay/Documents/crowd/train.tfrecords'  # address to save the TFRecords file
+train_filename = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/train.tfrecords'  # address to save the TFRecords file
 # open the TFRecords file
 writer = tf.python_io.TFRecordWriter(train_filename)
 for i in range(len(train_addrs)):

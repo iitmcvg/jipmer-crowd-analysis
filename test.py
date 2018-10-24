@@ -6,44 +6,54 @@ import argparse
 from resnet_crowd import crowd
 # from model_train import loss,optimizer,summary
 import cv2
+import numpy as np
 
 
 parser = argparse.ArgumentParser(description="Inputs to the code")
-parser.add_argument("--load_ckpt",type = str,default='/home/saivinay/Documents/crowd/checkpoints/',help="path to load checkpoints from")
+parser.add_argument("--load_ckpt",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints/',help="path to load checkpoints from")
 args = parser.parse_args()
 
 
-image_path = '/home/saivinay/Documents/crowd/shanghai_dataset/part_A/test_data/images/IMG_1.jpg'
-heatmap_path = '/home/saivinay/Documents/crowd/shanghai_dataset/part_A/test_data/labels/LAB_1.npy'
-count_path = '/home/saivinay/Documents/crowd/shanghai_dataset/part_B/test_data/count/COUNT_1.jpg'
+image_path = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/images/IMG_1.jpg'
+ground_image_path = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/labels/LAB_1.npy'
+ground_count_path = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/count/COUNT_1.npy'
 
 mask = []
-count = []
-
+ground_truth_count = np.load(ground_count_path)
+print(ground_truth_count)
 image = cv2.imread(image_path)
-# print(image.get_shape())
-# test_image = _corrupt_brightness(image,mask,count)
-# test_image = _corrupt_contrast(image,mask,count)
-# test_image = _corrupt_saturation(image,mask,count)
-# test_image = _flip_left_right(image,mask,count)
+
+
+cv2.imshow("img",image)
+cv2.waitKey(1000) # a gray scale image
+cv2.destroyAllWindows()
+
 x = tf.placeholder(shape=(None, 224, 224, 3), dtype=tf.float32)
 model = crowd(x)
 saver = tf.train.Saver()
 
 
-PATH = "/home/saivinay/Documents/crowd/summary"
+PATH = "/home/saivinay/Documents/jipmer-crowd-analysis/summary"
 
 with tf.Session() as sess:
     # summ_writer = tf.summary.FileWriter(PATH,sess.graph)
     # summary = tf.summary.merge_all()
 
-    saver.restore(sess,tf.train.latest_checkpoint(args.load_ckpt))
+    saver.restore(sess,tf.train.latest_checkpoint('/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints/'))
+    
     image = cv2.resize(image, (224,224))
     [heatmap_val , count_val] = sess.run(model.output, feed_dict={x: image[None, :, :, :]})
-    print(heatmap_val)
+
+    # heatmap_val = tf.reshape(heatmap_val,[224,224,1])
     print(heatmap_val.shape)
-    plt.imshow(heatmap_val[0,:,:,0])
+    print(image.shape)
+
+    plt.subplot(2,2,1)
+    plt.plot(heatmap_val[0,:,:,0])
+    plt.subplot(2,2,2)
+    plt.plot(image[:,:,0])
     plt.show()
+    
     # _,loss_val,summary_val  = sess.run([optimizer,loss,summary])
     # heatmap,count = sess.run([crowd(image_path).output])
     

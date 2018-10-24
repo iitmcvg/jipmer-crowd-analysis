@@ -82,9 +82,9 @@ def calculate_loss(model,ground_truth_heatmap,ground_truth_count):
     
     heatmap, count = model.output
     # print(count)
-    tf.summary.image('predicted', heatmap)
-    tf.summary.image('ground_truth', ground_truth_heatmap)
-    heatmap = tf.reshape(heatmap,[-1, 28*28])
+    tf.summary.image('predicted', heatmap)                          # predicted image of the predicted image 
+    tf.summary.image('ground_truth', ground_truth_heatmap)          # ground truth image
+    heatmap = tf.reshape(heatmap,[-1, 28*28])                       # making all the output images flat
     ground_truth_heatmap = tf.reshape(ground_truth_heatmap, [-1, 28*28])
     loss_heatmap = tf.keras.backend.binary_crossentropy(
                         ground_truth_heatmap,

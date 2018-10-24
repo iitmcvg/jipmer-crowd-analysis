@@ -46,7 +46,7 @@ def gaussian_filter_density(gt):
 
 
 #set the root to the Shanghai dataset you download
-root = '/home/saivinay/Documents/crowd/shanghai_dataset/'
+root = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/'
 
 #now generate the ShanghaiA's ground truth
 part_A_train = os.path.join(root,'part_A/train_data','images')
