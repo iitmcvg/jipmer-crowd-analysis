@@ -33,13 +33,13 @@ model = crowd(x)
 saver = tf.train.Saver()
 
 
-PATH = "/home/saivinay/Documents/jipmer-crowd-analysis/summary"
+PATH = args.summary_path
 
 with tf.Session() as sess:
     # summ_writer = tf.summary.FileWriter(PATH,sess.graph)
     # summary = tf.summary.merge_all()
 
-    saver.restore(sess,tf.train.latest_checkpoint('/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints/'))
+    saver.restore(sess,tf.train.latest_checkpoint(args.load_ckpt))
     
     image = cv2.resize(image, (224,224))
     [heatmap_val , count_val] = sess.run(model.output, feed_dict={x: image[None, :, :, :]})
