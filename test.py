@@ -33,7 +33,7 @@ model = crowd(x)
 saver = tf.train.Saver()
 
 
-PATH = args.summary_path
+# PATH = args.summary_path
 
 with tf.Session() as sess:
     # summ_writer = tf.summary.FileWriter(PATH,sess.graph)

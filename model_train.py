@@ -1,3 +1,5 @@
+
+
 import argparse
 import tensorflow as tf
 import numpy as np
@@ -6,6 +8,7 @@ from input_data import input_data
 import os
 from os.path import exists
 import random
+import cv2
 
 if __name__ == '__main__':
 
@@ -15,15 +18,15 @@ if __name__ == '__main__':
     parser.add_argument("--input_record_file",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/train.tfrecords',help="path to TFRecord file with training examples")
     parser.add_argument("--batch_size",type=int,default=16,help="Batch Size")
     parser.add_argument("--log_directory",type = str,default='./log_dir',help="path to tensorboard log")
-    parser.add_argument("--ckpt_savedir",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints/',help="path to save checkpoints")
-    parser.add_argument("--load_ckpt",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints/',help="path to load checkpoints from")
+    parser.add_argument("--ckpt_savedir",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints',help="path to save checkpoints")
+    parser.add_argument("--load_ckpt",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints',help="path to load checkpoints from")
     parser.add_argument("--save_freq",type = int,default=50,help="save frequency")
     parser.add_argument("--display_step",type = int,default=1,help="display frequency")
     parser.add_argument("--summary_freq",type = int,default=50,help="summary writer frequency")
     parser.add_argument("--no_iterations",type=int,default=50000,help="number of iterations for training")
     parser.add_argument("--learning_rate",type=float,default=0.001,help="learning rate for training")
-    parser.add_argument("--summary_path",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/summary/',help="path to tensorboard summary")
-    parser.add_argument("--validation_dir",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/')
+    parser.add_argument("--summary_path",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/summary',help="path to tensorboard summary")
+    parser.add_argument("--validation_dir",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data')
 
     args = parser.parse_args()
 
@@ -69,6 +72,9 @@ if __name__ == '__main__':
     
     saver = tf.train.Saver()                                                  # creating a saver
 
+    
+    
+    
     with tf.Session() as sess:
 
         sess.run(init)                                                        # initializing all global variables
@@ -94,15 +100,15 @@ if __name__ == '__main__':
             # Running optimizer every iteration    
             global_step,_  = sess.run([global_step_tensor,optimizer])
             
-            
+            print(global_step)
             # if global_step%(args.summary_freq) == 0:
                 # print("Loss at iteration :", '%04d' %global_step, " is ",loss_val )
                 # summ_writer.add_summary(summary_val,global_step)                      # adding summary
                
             
-            if global_step%(args.save_freq)==0:
+            if global_step%(args.save_freq/50)==0:   
 
-                loss_val,loss_heatmap_val,loss_count_val = sess.run(loss,loss_heatmap,loss_count)
+                loss_val,loss_heatmap_val,loss_count_val = sess.run([loss,loss_heatmap,loss_count])
                 f"Loss : {loss_val},Loss_heatmap : {loss_heatmap_val},Loss_count : {loss_count_val}, iteration : {str(global_step)} "     # These are training losses
 
                 # saving the model
@@ -111,17 +117,19 @@ if __name__ == '__main__':
 
 
                 # Evaluation and writing into tensorboard
-                random_image_path = random.choice(x for x in os.listdir(os.path.join(args.validation_dir,"images"))
-                                    if os.path.isfile(os.path.join("path", x)))
-                image = cv2.imread(random_image_path)
+                random_image_path = random.choice(os.listdir(os.path.join(args.validation_dir,"images")))
+                
+                image = cv2.imread(os.path.join(args.validation_dir,"images/",random_image_path))
                 image = cv2.resize(image, (224,224))
                 ground_truth_heatmap = random_image_path.replace('.jpg','.npy').replace('images','labels').replace('IMG_','LAB_')
                 ground_truth_count =  random_image_path.replace('.jpg','.npy').replace('images','count').replace('IMG_','COUNT_')
 
 
-                  
-                heatmap,count = sess.run(crowd(image))
-                Loss,Loss_heatmap,Loss_count = sess.run(calculate_loss(crowd(image),ground_truth_heatmap,ground_truth_count))
+                x = tf.placeholder(shape=(None, 224, 224, 3), dtype=tf.float32)
+                model_val = crowd(x)
+                
+                heatmap,count = sess.run(model_val.output , feed_dict={x : image[None,:,:,:]})
+                Loss,Loss_heatmap,Loss_count = sess.run(calculate_loss(model_val,ground_truth_heatmap,ground_truth_count) , feed_dict={x : image[None,:,:,:]})
                 
                 
                 tf.summary.image('predicted_heatmap',heatmap)
