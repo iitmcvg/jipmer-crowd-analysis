@@ -36,14 +36,15 @@ def _corrupt_saturation(image, mask, count):
 def parse_records(recordfile):
     feature = {'train/image': tf.FixedLenFeature([], tf.string),
                'train/label': tf.FixedLenFeature([], tf.string),
-               'train/count': tf.FixedLenFeature([], tf.string)}
+               'train/count': tf.FixedLenFeature([], tf.int64)}
     features = tf.parse_single_example(recordfile, feature)
     image = tf.reshape(tf.decode_raw(features['train/image'], tf.float32),[224,224,3]) 
     image = image - tf.constant([103.99, 116.779, 123.68])
     image = tf.image.resize_images(image, [img_rows, img_cols])
     label = tf.reshape(tf.decode_raw(features['train/label'], tf.float32),[224,224,1]) 
     label = tf.image.resize_images(label, [img_rows//fac, img_cols//fac])
-    count = tf.reshape(tf.decode_raw(features['train/count'], tf.float32),[1]) # shape
+    count = tf.reshape(tf.cast(features['train/count'], tf.int32), [1])
+    # count = tf.reshape(tf.decode_raw(features['train/count'], tf.float32),[1]) # shape
 
     return image,label,count
 
@@ -78,6 +79,7 @@ def _crop_random(image, mask):
 
     return image, mask
 
+# performing operations on the batch of examples of tfrecord file
 def input_data(TFRecordfile = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/train.tfrecords',batch_size = 8, augment = True, num_threads=2, prefetch =30):
     train_dataset = tf.data.TFRecordDataset(TFRecordfile)
     train_dataset = train_dataset.map(parse_records,num_parallel_calls=num_threads)

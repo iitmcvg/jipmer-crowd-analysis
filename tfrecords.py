@@ -6,7 +6,7 @@ import glob
 import sys
 import os
 
-root = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/train_data/images/'
+root = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/images/'
 
 def get_filenames():
     filenames = os.listdir(root)
@@ -20,9 +20,12 @@ def get_filenames():
         count_files.append(im_file.replace('IMG_','COUNT_').replace('.jpg','.npy').replace('images','count'))
     return image_files,label_files,count_files
 
-shuffle_data = True  # shuffle the addresses before saving
+# shuffle the addresses before saving
+shuffle_data = True  
+
 # read addresses and labels from the 'train' folder
 train_addrs,train_labels,train_count = get_filenames()
+
 # to shuffle data
 if shuffle_data:
     c = list(zip(train_addrs, train_labels,train_count))
@@ -47,21 +50,25 @@ def load_labels(addr):
     return lab
 
 def load_count(addr):
-    count = np.load(addr)
-    count.astype(np.float32)
-    count = np.array(count)
-    count.astype(np.float32)
+    count = np.load(addr).astype(np.int64)
+    print (count)
+    # count = count.
+    # count = np.array(count)
+    # count.astype(np.float32)
     return count
 
 
 def _bytes_feature(value):
   return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
+def _int64_feature(value):
+  return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
+
 train_filename = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/train.tfrecords'  # address to save the TFRecords file
 # open the TFRecords file
 writer = tf.python_io.TFRecordWriter(train_filename)
 for i in range(len(train_addrs)):
-    # print how many images are saved every 1000 images
+    # print num of images saved every 1000 images
     if not i % 10:
         print('Train data: {}/{}'.format(i, len(train_addrs)))
         sys.stdout.flush()
@@ -72,8 +79,8 @@ for i in range(len(train_addrs)):
     # Create a feature
     feature = {'train/label': _bytes_feature(tf.compat.as_bytes(label.tostring())),
                'train/image': _bytes_feature(tf.compat.as_bytes(img.tostring())),
-                'train/count': _bytes_feature(tf.compat.as_bytes(count.tostring()))}
-    # Create an example protocol buffer
+                'train/count':_int64_feature(count)}
+    # Create an example protocol buffer  
     example = tf.train.Example(features=tf.train.Features(feature=feature))
     
     # Serialize to string and write on the file

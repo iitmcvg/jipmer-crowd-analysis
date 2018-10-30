@@ -11,12 +11,15 @@ import numpy as np
 
 parser = argparse.ArgumentParser(description="Inputs to the code")
 parser.add_argument("--load_ckpt",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/checkpoints/',help="path to load checkpoints from")
+parser.add_argument("--image_path",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/images/IMG_1.jpg',help="Path for test images")
+parser.add_argument("--heatmap_path",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/labels/LAB_1.npy',help="Path for actual heatmap")
+parser.add_argument("--count_path",type=str,default='/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/count/COUNT_1.npy',help="Path for actual count")
 args = parser.parse_args()
 
 
-image_path = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/images/IMG_1.jpg'
-ground_image_path = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/labels/LAB_1.npy'
-ground_count_path = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/part_A/test_data/count/COUNT_1.npy'
+image_path = args.image_path
+ground_image_path = args.heatmap_path
+ground_count_path = args.count_path
 
 mask = []
 ground_truth_count = np.load(ground_count_path)
@@ -32,8 +35,6 @@ x = tf.placeholder(shape=(None, 224, 224, 3), dtype=tf.float32)
 model = crowd(x)
 saver = tf.train.Saver()
 
-
-# PATH = args.summary_path
 
 with tf.Session() as sess:
     # summ_writer = tf.summary.FileWriter(PATH,sess.graph)

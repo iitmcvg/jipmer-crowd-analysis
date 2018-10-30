@@ -15,10 +15,12 @@ from tqdm import tqdm
 from numba import cuda
 import cv2
 import tensorflow as tf
+
 #this is borrowed from https://github.com/davideverona/deep-crowd-counting_crowdnet
 # @cuda.autojit()
+
 def gaussian_filter_density(gt):
-#     print (gt.shape)
+    #print (gt.shape)
     density = np.zeros(gt.shape, dtype=np.float32)
     gt_count = np.count_nonzero(gt)
     if gt_count == 0:
@@ -45,10 +47,10 @@ def gaussian_filter_density(gt):
     return density
 
 
-#set the root to the Shanghai dataset you download
+# set the root to the Shanghai dataset 
 root = '/home/saivinay/Documents/jipmer-crowd-analysis/shanghai_dataset/'
 
-#now generate the ShanghaiA's ground truth
+# now generate the ShanghaiA's ground truth
 part_A_train = os.path.join(root,'part_A/train_data','images')
 part_A_test = os.path.join(root,'part_A/test_data','images')
 part_B_train = os.path.join(root,'part_B/train_data','images')
@@ -63,14 +65,11 @@ for path in path_sets:
         img_paths.append(img_path)
 
 for img_path in tqdm(img_paths):
-#     print (img_path)
-    # print(img_path)
     mat = io.loadmat(img_path.replace('.jpg','.mat').replace('images','ground-truth').replace('IMG_','GT_IMG_'))
     # print (mat.keys())
     lab_path = img_path.replace('.jpg','.npy').replace('images','labels').replace('IMG_','LAB_')
     img = plt.imread(img_path)
     k = np.zeros((img.shape[0],img.shape[1]))
-    # gt = mat["image_imreadinfo"][0,0][0,0][0]
     gt = mat["image_info"][0,0][0,0][0]
 
  '''   img = cv2.imread(img_path)
@@ -85,11 +84,11 @@ for img_path in tqdm(img_paths):
     # print((gt))
     exit(0) '''
 
-    # To save the number of people counted in each image in count_path
+    ###### saving the number of people counted in corresponding image at count_path #####
     count_path = img_path.replace('.jpg','.npy').replace('images','count').replace('IMG_','COUNT_')
     np.save(count_path,len(gt))
     
-    
+    ##### saving the heatmaps generated from images at lab_path #####
     if not os.path.exists(path=lab_path):
 #         continue
         for i in range(0,len(gt)):
@@ -102,6 +101,14 @@ for img_path in tqdm(img_paths):
 #     plt.show()
 #     with h5py.File(img_path.replace('.jpg','.h5').replace('images','ground_truth'), 'w') as hf:
 #             hf['density'] = k
+
+
+
+
+
+
+
+
 
 
 #now see a sample from ShanghaiA
