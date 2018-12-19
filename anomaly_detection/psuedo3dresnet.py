@@ -1,3 +1,5 @@
+## Borrowed from https://github.com/qijiezhao/pseudo-3d-pytorch
+
 from __future__ import print_function
 import torch
 import torch.nn as nn
@@ -6,7 +8,6 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 import math
 from functools import partial
-# !pip install torchsummary
 from torchsummary import summary
 from data_preprocess import make_segment
 
@@ -27,8 +28,8 @@ def downsample_basic_block(x, planes, stride):
     zero_pads = torch.Tensor(out.size(0), planes - out.size(1),
                              out.size(2), out.size(3),
                              out.size(4)).zero_()
-    if isinstance(out.data, torch.cuda.FloatTensor):
-        zero_pads = zero_pads.cuda()
+    if isinstance(out.data, torch.FloatTensor): #.cuda
+        zero_pads = zero_pads#.cuda()
 
     out = Variable(torch.cat([out.data, zero_pads], dim=1))
 
@@ -386,8 +387,8 @@ if __name__ == '__main__':
 
     model = P3D199(num_classes=400)
     model = model#.cuda()
-    data = make_segment()
-    # data=torch.autograd.Variable(torch.rand(1,3,16,160,160)).cuda()   # if modality=='Flow', please change the 2nd dimension 3==>2
+    # data = make_segment()
+    data=torch.autograd.Variable(torch.rand(2,3,16,160,160))#.cuda()   # if modality=='Flow', please change the 2nd dimension 3==>2
     out=model(data)
 #     print(P3D())
 #     print(summary(model,input_size=(3,16,160,160)))
