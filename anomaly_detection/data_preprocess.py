@@ -4,8 +4,13 @@ import cv2
 import glob
 import scipy.io
 import torch 
+import argparse
 
-video = '/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/videoplayback'
+parser = argparse.ArgumentParser(description="Inputs to code")
+parser.add_argument("--video_path", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/videoplayback")
+args = parser.parse_args()
+
+video = args.video_path
 
 def make_segment():
     cap = cv2.VideoCapture(video)
