@@ -7,7 +7,7 @@ import torch
 import argparse
 
 parser = argparse.ArgumentParser(description="Inputs to code")
-parser.add_argument("--video_path", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/videoplayback")
+parser.add_argument("--video_path", type = str, default = "videoplayback")
 args = parser.parse_args()
 
 video = args.video_path
