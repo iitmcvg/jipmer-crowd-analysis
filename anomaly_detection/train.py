@@ -3,23 +3,28 @@ import os
 import numpy as np
 import argparse
 from torch.autograd import Variable
-import psuedo3dresnet
 import data_preprocess
 from os.path import exists
+
+import psuedo3dresnet
 from psuedo3dresnet import P3D63, P3D131, P3D199
-from data_preprocess import make_segment
+from data_preprocess import make_segment, videos_array
 
 parser = argparse.ArgumentParser(description="Inputs to the code")
-parser.add_argument("--batch_size",type=int,default=8,help="Batch Size")
-parser.add_argument("--log_directory",type = str,default='./log_dir',help="path to tensorboard log")
+parser.add_argument("--anomaly_videos",type = str ,default="/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/anomaly_videos",help="path of anomaly videos")
+parser.add_argument("--normal_videos",type = str ,default="/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/normal_videos",help="path of normal videos")
+parser.add_argument("--no_of_videos", type = int, default = 1, help = "the number of videos of each anomaly and normal that are used for training atmost = total no of videos of each type")
+parser.add_argument("--num_epochs",type=float,default=1000,help="num of epochs for training")
+parser.add_argument("--learning_rate",type=float,default=0.001,help="learning rate for training")
 parser.add_argument("--ckpt_savedir",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/checkpoints/',help="path to save checkpoints")
-parser.add_argument("--load_ckpt",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/checkpoints/',help="path to load checkpoints from")
+parser.add_argument("--load_ckpt",type = str,default='/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/checkpoints/',help="path to load checkpoints ")
 parser.add_argument("--save_freq",type = int,default=50,help="save frequency")
 parser.add_argument("--display_step",type = int,default=1,help="display frequency")
 parser.add_argument("--summary_freq",type = int,default=50,help="summary writer frequency")
+
+parser.add_argument("--log_directory",type = str,default='./log_dir',help="path to tensorboard log")
+parser.add_argument("--batch_size",type=int,default=8,help="Batch Size")
 parser.add_argument("--no_iterations",type=int,default=50000,help="number of iterations for training")
-parser.add_argument("--learning_rate",type=float,default=0.001,help="learning rate for training")
-parser.add_argument("--num_epochs",type=float,default=1000,help="num of epochs for training")
 args = parser.parse_args()
 
 
@@ -73,18 +78,19 @@ def Train():
 
         anomaly_scores = []
         normal_scores = []
-        num_videos = 0           # for keeping count of a certain type of video
-        optimizer.zero_grad()
-        while(True):
 
-            output = model(make_segment())
-            
-            if num_videos<40:
-                anomaly_scores.append(output)
-                num_videos +=1
-            else:
-                normal_scores.append(output)
-            
+        optimizer.zero_grad()
+        
+        anomaly_videos = videos_array(args.anomaly_videos)
+        normal_videos = videos_array(args.normal_videos)
+
+        for j in range(args.no_of_videos):
+            anomaly_score = model(make_segment(anomaly_videos[j]))
+            anomaly_scores.append(anomaly_score)
+
+            normal_score = model(make_segment(normal_videos[j]))
+            normal_scores.append(normal_score)    
+      
 
         max_anomaly_score = max(anomaly_scores)
         max_normal_score = max(normal_scores)

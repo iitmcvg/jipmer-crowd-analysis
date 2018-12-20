@@ -8,11 +8,20 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Inputs to code")
 parser.add_argument("--video_path", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/videoplayback")
+parser.add_argument("--normal_videos", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/normal_videos/")
+parser.add_argument("--anomaly_videos", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/anomaly_videos/")
+
 args = parser.parse_args()
 
-video = args.video_path
+# video = args.video_path
 
-def make_segment():
+def videos_array(path, array = []):
+    for i in glob.glob(os.path.join(path,"*")):
+        # print(i)
+        array.append(i)
+    return array
+
+def make_segment(video):
     cap = cv2.VideoCapture(video)
     flag = 0
     i = 0
@@ -47,20 +56,20 @@ def make_segment():
     video_segment = np.expand_dims(video_segment, axis = 0 )
     video_segment = np.swapaxes(video_segment, 3, 4)
     video_segment = np.swapaxes(video_segment, 2, 3)
-    video_segment = np.resize(video_segment,(231, 1, 3, 176, 320))
+    video_segment = np.resize(video_segment,(30, 1, 3, 160, 160))
     video_segment = np.swapaxes(video_segment, 1, 2)
     return (torch.from_numpy(video_segment)).type('torch.FloattTensor')
 
 if __name__ == "__main__":
     
-    video_segment = make_segment()
+    anomaly_videos = videos_array(args.anomaly_videos)
+    video_segment = make_segment(anomaly_videos[0])
     video_segment = np.expand_dims(video_segment, axis = 0 )
     video_segment = np.expand_dims(video_segment, axis = 0 )
     video_segment = np.swapaxes(video_segment, 3, 4)
     video_segment = np.swapaxes(video_segment, 2, 3)
-    video_segment = np.resize(video_segment,(231, 1, 3, 176, 320))
+    video_segment = np.resize(video_segment,(30, 1, 3, 160, 160))
     video_segment = np.swapaxes(video_segment, 1, 2)            
-
 
     print(video_segment.shape)
 
