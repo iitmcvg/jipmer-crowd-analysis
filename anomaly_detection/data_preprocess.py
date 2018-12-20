@@ -7,10 +7,14 @@ import torch
 import argparse
 
 parser = argparse.ArgumentParser(description="Inputs to code")
+<<<<<<< HEAD
 parser.add_argument("--video_path", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/videoplayback")
 parser.add_argument("--normal_videos", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/normal_videos/")
 parser.add_argument("--anomaly_videos", type = str, default = "/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/anomaly_videos/")
 
+=======
+parser.add_argument("--video_path", type = str, default = "videoplayback")
+>>>>>>> 32709fa60cd3ffe57a7efbf570fa2e02994ba2b3
 args = parser.parse_args()
 
 # video = args.video_path
