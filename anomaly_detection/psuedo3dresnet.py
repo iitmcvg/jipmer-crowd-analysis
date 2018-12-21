@@ -182,8 +182,8 @@ class P3D(nn.Module):
         self.avgpool = nn.AvgPool2d(kernel_size=(5, 5), stride=1)                              # pooling layer for res5.
         self.dropout=nn.Dropout(p=dropout)
         self.fc = nn.Linear(512 * block.expansion, 512)
-        self.fc1 = nn.Linear(512, 32)
-        self.fc2 = nn.Linear(32, 1)
+        self.fc1 = nn.Linear(512, 32)       # added
+        self.fc2 = nn.Linear(32, 1)         # added
         
         
 
@@ -274,8 +274,8 @@ class P3D(nn.Module):
 
         x = x.view(-1,self.fc.in_features)
         x = self.fc(self.dropout(x))
-        x = self.fc1(self.dropout(x))
-        x = self.fc2(self.dropout(x))
+        x = self.fc1(self.dropout(x))       # added
+        x = self.fc2(self.dropout(x))       # added
         
 
         return x
