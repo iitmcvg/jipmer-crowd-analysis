@@ -8,11 +8,11 @@ from os.path import exists
 
 import psuedo3dresnet
 from psuedo3dresnet import P3D63, P3D131, P3D199
-from data_preprocess import make_segment, videos_array
+from data_preprocess import frames, make_segments, videos_array, 
 
 parser = argparse.ArgumentParser(description="Inputs to the code")
-parser.add_argument("--anomaly_videos",type = str ,default="/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/anomaly_videos",help="path of anomaly videos")
-parser.add_argument("--normal_videos",type = str ,default="/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/normal_videos",help="path of normal videos")
+parser.add_argument("--anomaly_videos_path",type = str ,default="/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/anomaly_videos",help="path of anomaly videos")
+parser.add_argument("--normal_videos_path",type = str ,default="/home/saivinay/Documents/jipmer-crowd-analysis/anomaly_detection/dataset/normal_videos",help="path of normal videos")
 parser.add_argument("--no_of_videos", type = int, default = 1, help = "the number of videos of each anomaly and normal that are used for training atmost = total no of videos of each type")
 parser.add_argument("--num_epochs",type=float,default=1000,help="num of epochs for training")
 parser.add_argument("--learning_rate",type=float,default=0.001,help="learning rate for training")
@@ -28,12 +28,8 @@ parser.add_argument("--no_iterations",type=int,default=50000,help="number of ite
 args = parser.parse_args()
 
 
-lambda_1 = torch.randn(1, dtype=torch.float)
-lambda_2 = torch.randn(1, dtype=torch.float)
-
-# lambda_1  = Variable(torch.random(1), requires_grad = True) 
-# lambda_2 = Variable(torch.random(1), requires_grad = True) 
-
+lambda_1 = torch.tensor(8e-5, requires_grad = False)
+lambda_2 = torch.tensor(8e-5, requires_grad = False)
 
 
 class Loss(torch.nn.Module):
@@ -72,28 +68,38 @@ def Train():
         checkpoint = torch.load(args.load_ckpt)
         model.load_state_dict(checkpoint)
 
-    optimizer = torch.optim.SGD(model.parameters(), lr = 0.001, momentum=0.9)
+    optimizer = torch.optim.Adagrad(model.parameters(), lr = args.learning_rate, momentum=0.9)
 
     for i in range(args.num_epochs):
 
-        anomaly_scores = []
-        normal_scores = []
+        anomaly_videos = videos_array(args.anomaly_videos_path)
+        normal_videos = videos_array(args.normal_videos_path)
+        optimizer.zero_grad()        
 
-        optimizer.zero_grad()
-        
-        anomaly_videos = videos_array(args.anomaly_videos)
-        normal_videos = videos_array(args.normal_videos)
+        for j in range(len(videos_array(args.anomaly_videos_path))):
+            anomaly_scores = []
+            normal_scores = []
+            video_segments_anomaly, num_16segment_frames1 = make_segments(anomaly_videos[j])
+            video_segments_normal, num_16segment_frames2 = make_segments(normal_videos[j])
+            
+            for k in range(30):
+                temp1 = []
+                temp2 = []
+                for l in range(num_16segment_frames1):
+                    anomaly_score = model(video_segments_anomaly[k][l])
+                    temp1.append(anomaly_score)
+                for l in range(num_16segment_frames2):
+                    normal_score = model(video_segments_normal[k][l])
+                    temp2.append(normal_score)
+            
+                anomaly_score = sum(temp1)/float(len(temp1))
+                normal_score = sum(temp2)/float(len(temp2))
 
-        for j in range(args.no_of_videos):
-            anomaly_score = model(make_segment(anomaly_videos[j]))
-            anomaly_scores.append(anomaly_score)
+                anomaly_scores.append(anomaly_score)
+                normal_scores.append(normal_score)    
 
-            normal_score = model(make_segment(normal_videos[j]))
-            normal_scores.append(normal_score)    
-      
-
-        max_anomaly_score = max(anomaly_scores)
-        max_normal_score = max(normal_scores)
+            max_anomaly_score = max(anomaly_scores)
+            max_normal_score = max(normal_scores)
     
         loss = Loss(lambda_1, lambda_2, max_anomaly_score, max_normal_score, anomaly_scores)
         print("===> Epoch[{}]  Loss: {:.4f}".format(i, loss.item()))
