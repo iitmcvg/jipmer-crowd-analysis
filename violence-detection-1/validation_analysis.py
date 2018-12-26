@@ -35,7 +35,7 @@ def show_data(videoUrl,resize):
     line, = axes.plot(xdata, ydata, 'r-')
     cam = cv2.VideoCapture(videoUrl)
     liks=np.load('LDAresult/likelihood.npy')
-    print (np.amax(liks), np.amin(liks))
+    # print (np.amax(liks), np.amin(liks))
     j=0
     i=0
     count=0
@@ -45,7 +45,7 @@ def show_data(videoUrl,resize):
             break
         if(i>=liks.shape[0]):
             break
-        print (liks[i])
+        # print (liks[i])
 
         xdata.append(count)
         ydata.append(liks[i])
@@ -60,10 +60,10 @@ def show_data(videoUrl,resize):
             i+=1
             j=0
         img = cv2.resize(img, (0, 0), fx=resize, fy=resize)
-
+        cv2.namedWindow('video',cv2.WINDOW_NORMAL)
+        cv2.resizeWindow('video', 600,600)
         cv2.imshow('video', img)
-        ch = 0xFF & cv2.waitKey(5)
-        if ch == 27:
+        if cv2.waitKey(5) & 0xFF == ord('q'):
             break
         j+=1
     plt.show()
@@ -73,4 +73,4 @@ def show_data(videoUrl,resize):
 if __name__ == '__main__':
     import sys
 
-    show_data('Crowd-Activity-All.avi', 1)
+    show_data('vid2.mp4', 1)
