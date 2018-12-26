@@ -5,7 +5,7 @@ import bag_of_words_analysis
 import lda
 import matplotlib.pyplot as plt
 import time
-
+import argparse
 
 '''
 This is the reproduction of "Abnormal Crowd Behavior Detection using Social Force Model" by Ramin Mehran, Alexis Oyama, Mubarak Shah
@@ -19,7 +19,12 @@ References
 
 '''
 
-def show_data(videoUrl,resize):
+parser = argparse.ArgumentParser()
+parser.add_argument("--video_path", type = str, default = "./video.mp4")
+args = parser.parse_args()
+
+
+def show_data(video,resize):
     xdata = []
     ydata = []
 
@@ -33,7 +38,7 @@ def show_data(videoUrl,resize):
     axes.xaxis.grid(True, which='major',color='b', linestyle='-', alpha=0.8)
     axes.xaxis.grid(True, which='minor',color='r', linestyle='-', alpha=0.2)
     line, = axes.plot(xdata, ydata, 'r-')
-    cam = cv2.VideoCapture(videoUrl)
+    cam = cv2.VideoCapture(video)
     liks=np.load('LDAresult/likelihood.npy')
     # print (np.amax(liks), np.amin(liks))
     j=0
@@ -73,4 +78,4 @@ def show_data(videoUrl,resize):
 if __name__ == '__main__':
     import sys
 
-    show_data('vid2.mp4', 1)
+    show_data(args.video_path, 1)
