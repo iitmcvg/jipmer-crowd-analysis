@@ -4,9 +4,9 @@ Abnormal Crowd Detection Implementation with Python
 
 ![Alt text](/picture1.png?raw=true "Function Pick")
 
-# Get the video from [Detection of Unusual Crowd Activity](http://mha.cs.umn.edu/proj_events.shtml)
+##### Get the video from [Detection of Unusual Crowd Activity](http://mha.cs.umn.edu/proj_events.shtml)
 
-# Test the video by using the --video_path command line argument to validation_analysis.py 
+##### Test the video by using the --video_path command line argument to validation_analysis.py 
 
 # Crowd Flow With Abnormal Simulation Video
 
