@@ -1,7 +1,5 @@
 # Abnormal Crowd Detection
-Abnormal Crowd Detection Implementation with Python
 
-![Alt text](/picture1.png?raw=true "Function Pick")
 
 ##### Get the video from [Detection of Unusual Crowd Activity](http://mha.cs.umn.edu/proj_events.shtml)
 
