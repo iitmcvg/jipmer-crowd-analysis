@@ -20,7 +20,7 @@ References
 '''
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--video_path", type = str, default = "./video.mp4")
+parser.add_argument("--video_path", type = str, default = "./Crowd-Activity-All.avi")
 args = parser.parse_args()
 
 

@@ -1,6 +1,6 @@
 import numpy as np
 import cv2
-
+import argparse
 '''
 This is the reproduction of "Abnormal Crowd Behavior Detection using Social Force Model" by Ramin Mehran, Alexis Oyama, Mubarak Shah
 The document is attached to project
@@ -20,6 +20,11 @@ Arguments:
     img - opencv image matrix
     text - required text
 '''
+parser = argparse.ArgumentParser()
+parser.add_argument("--scale", type = float, default = 1.5, help="adjust this according to video to see the results properly")
+parser.add_argument("--video_path", type = str, default = "./vid1.mov", help = "the path for video input")
+args = parser.parse_args()
+
 def write_text_on_image(img,text):
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(img, text, (40, 40), font, 0.1, (255, 255, 255), 2)
@@ -40,12 +45,12 @@ Returns:
 def draw_flow(img, flow, step=16):
     h, w = img.shape[:2]
     y, x = np.mgrid[step / 2:h:step, step / 2:w:step].reshape(2, -1).astype('int')
-    scale=1.2
+    scale = args.scale             # default = 1.5
     fx, fy = flow[y, x].T*scale
     lines = np.vstack([x, y, x + fx, y + fy]).T.reshape(-1, 2, 2)
     lines = np.int32(lines + 0.5)
-    vis = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-    cv2.polylines(vis, lines, 0, (0, 255, 255),1)
+    vis = cv2.cvtColor(img, cv2.COLOR_GRAY2RGB)
+    cv2.polylines(vis, lines, 0, (0, 255, 0),1)
     for (x1, y1), (x2, y2) in lines:
         cv2.circle(vis, (x1, y1), 1, (0, 0, 255), -1)
     return vis
@@ -66,7 +71,7 @@ Returns:
 def draw_flow_with_force(img, flow, force, step=16):
     h, w = img.shape[:2]
     y, x = np.mgrid[step / 2:h:step, step / 2:w:step].reshape(2, -1)
-    scale=3
+    scale=args.scale            # default = 1.5
     fx, fy = flow[y, x].T*scale
     lines = np.vstack([x, y, x + fx, y + fy]).T.reshape(-1, 2, 2)
     lines = np.int32(lines + 0.5)
@@ -113,7 +118,7 @@ if __name__ == '__main__':
 
 # here and example of video with optical flow
     resize=2
-    cam = cv2.VideoCapture(sys.argv[1])
+    cam = cv2.VideoCapture(args.video_path)
     ret, prev = cam.read()
     if not ret:
         print ('Cant read file')
@@ -125,9 +130,9 @@ if __name__ == '__main__':
         vis = img.copy()
 
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        flow = cv2.calcOpticalFlowFarneback(prevgray, gray,None, 0.5, 5, 15, 3, 5, 1.1, 1)#cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
+        flow = cv2.calcOpticalFlowFarneback(prevgray, gray,None, 0.5, 5, 15, 3, 5, 1.1, 1)  #cv2.OPTFLOW_FARNEBACK_GAUSSIAN)
         prevgray = gray
-        cv2.imshow('flow', draw_flow(gray, flow))
+        cv2.imshow('flow', cv2.cvtColor(draw_flow(gray, flow), cv2.COLOR_BGR2RGB))
         ch = 0xFF & cv2.waitKey(5)
         if ch == 27:
             break
